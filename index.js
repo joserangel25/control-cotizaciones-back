@@ -13,13 +13,28 @@ dotenv.config()
 
 conectarDB()
 
+/**** Set Cors ****/
+const app_corsWhiteList = process.env.APP_CORSWHITELIST.split(", ");
+console.log(app_corsWhiteList)
+const allowlist = app_corsWhiteList;
+const corsOptionsDelegate = function (req, callback) {
+    let corsOptions;
+    if (allowlist.indexOf(req.header('Origin')) !== -1) {
+        corsOptions = { origin: true }
+    } else {
+        corsOptions = { origin: false }
+    }
+    callback(null, corsOptions)
+}
+app.use(cors(corsOptionsDelegate))
+
 //Configurando CORS
 // const corsOptions = {
 //   origin: [process.env.URL_FRONTED]
 // }
 
 // app.use(cors(corsOptions))
-app.use(cors())
+// app.use(cors())
 
 //Routing
 app.use('/api/usuarios', usuarioRoutes)
