@@ -22,6 +22,8 @@ const registrarUsuario = async (req, res) => {
 };
 
 const autenticarUsuario = async (req, res) => {
+  console.log(req)
+  console.log(req.origin)
   const { email, password } = req.body
   //Comprobar si existe el usuario en la base de datos
   const usuario = await Usuario.findOne({email});

@@ -14,11 +14,12 @@ dotenv.config()
 conectarDB()
 
 //Configurando CORS
-const corsOptions = {
-  origin: [process.env.URL_FRONTED]
-}
+// const corsOptions = {
+//   origin: [process.env.URL_FRONTED]
+// }
 
-app.use(cors(corsOptions))
+// app.use(cors(corsOptions))
+app.use(cors())
 
 //Routing
 app.use('/api/usuarios', usuarioRoutes)
