@@ -4,7 +4,8 @@ import {  registrarUsuario,
           olvidePassword, 
           restablecerPassword, 
           comprobarToken,
-          obtenerPerfil } from '../controllers/usuarioController.js';
+          obtenerPerfil,
+          buscarUsuario } from '../controllers/usuarioController.js';
 import { checkAuth } from '../middleware/checkAuth.js';
 
 const router = express.Router();
@@ -15,6 +16,8 @@ router.post('/olvide-password', olvidePassword)
 router.route('/olvide-password/:token')
       .get(comprobarToken)
       .post(restablecerPassword)
+
+router.post('/buscar-usuario', checkAuth, buscarUsuario)
 
 router.get('/perfil', checkAuth, obtenerPerfil)
 

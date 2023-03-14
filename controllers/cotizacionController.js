@@ -1,5 +1,6 @@
 import Cotizacion from '../models/Cotizacion.js'
 import Interaccion from '../models/Interaccion.js';
+import Usuario from '../models/Usuario.js';
 
 const obtenerCotizaciones = async (req, res) => {
 
@@ -14,10 +15,20 @@ const obtenerCotizaciones = async (req, res) => {
 }
 
 const crearCotizacion = async (req, res) => {
-  const cotizacion = new Cotizacion(req.body)
-  cotizacion.creador = req.usuario._id
+  const { _id } = req.usuario;
+
   try {
+    const usuarioEncontrado = await Usuario.findOne(_id);
+    
+    //Creamos y guardamos la cotización en la DB
+    const cotizacion = new Cotizacion(req.body)
+    cotizacion.creador = req.usuario._id
     const cotizacionAlmacenada = await cotizacion.save();
+
+    //Incluimos el ID de la cotizacion guardada en el usuario que la creó
+    usuarioEncontrado.cotizaciones.push(cotizacionAlmacenada._id)
+    await usuarioEncontrado.save()
+
     res.json(cotizacionAlmacenada)
   } catch (error) {
     console.log(error);

@@ -31,7 +31,14 @@ const usuarioSchema = mongoose.Schema({
   token: {
     type: String,
     default: ''
-  }
+  },
+  cotizaciones: [
+    {
+      type: mongoose.Types.ObjectId,
+      ref: 'Cotizacion',
+      default: []
+    }
+  ]
 },
 {
   timestamps: true

@@ -14,16 +14,15 @@ const registrarUsuario = async (req, res) => {
 
   try {
     const usuario = new Usuario(req.body)
-    const usuarioAlmacenado = await usuario.save()
-    res.json(usuarioAlmacenado)
+    await usuario.save()
+    res.json({msg: 'El usuario fue creado exitosamente!'})
   } catch (error) {
     console.log(error)
   }
 };
 
 const autenticarUsuario = async (req, res) => {
-  console.log(req)
-  console.log(req.origin)
+
   const { email, password } = req.body
   //Comprobar si existe el usuario en la base de datos
   const usuario = await Usuario.findOne({email});
@@ -45,7 +44,7 @@ const autenticarUsuario = async (req, res) => {
     const error= new Error('El password es incorrecto');
     return res.status(403).json({msg: error.message})
   }
-}
+};
 
 const olvidePassword = async (req, res) => {
   const { email } = req.body
@@ -64,7 +63,7 @@ const olvidePassword = async (req, res) => {
   } catch (error) {
     console.log(error)
   }
-}
+};
 
 const comprobarToken  = async (req, res) => {
   const { token } = req.params
@@ -76,7 +75,7 @@ const comprobarToken  = async (req, res) => {
   } else {
     res.json({msg: 'El token es válido y el usuario existe'})
   }
-}
+};
 
 const restablecerPassword  = async (req, res) => {
   const { token } = req.params;
@@ -104,6 +103,17 @@ const restablecerPassword  = async (req, res) => {
 const obtenerPerfil = async (req, res) => {
   const { usuario } = req
   res.json(usuario) 
+};
+
+const buscarUsuario = async (req, res) => {
+  const { email } = req.body
+  const usuario = await Usuario.findOne({email}).select('-createdAt -identificacion -password -token -updatedAt -__v -email');
+  if(!usuario){
+    const error= new Error('El usuario no está registrado');
+    return res.status(404).json({msg: error.message})
+  }
+
+  res.json(usuario)
 }
 
 export {
@@ -112,5 +122,6 @@ export {
   olvidePassword,
   restablecerPassword,
   comprobarToken,
-  obtenerPerfil
+  obtenerPerfil,
+  buscarUsuario
 }
