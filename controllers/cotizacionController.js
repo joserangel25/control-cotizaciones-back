@@ -1,3 +1,4 @@
+import Agencia from '../models/Agencia.js';
 import Cotizacion from '../models/Cotizacion.js'
 import Interaccion from '../models/Interaccion.js';
 import Usuario from '../models/Usuario.js';
@@ -20,10 +21,20 @@ const crearCotizacion = async (req, res) => {
   try {
     const usuarioEncontrado = await Usuario.findOne(_id);
     
+    const agencia = await Agencia.findOne({ colaboradores: { $in: [_id] } })
+    if(!agencia){
+      const error = new Error('Este usuario no está vinculado a ninguna agencia activa. Por favor validar con el administrador');
+      return res.status(403).json({ msg: error.message })
+    }
     //Creamos y guardamos la cotización en la DB
     const cotizacion = new Cotizacion(req.body)
     cotizacion.creador = req.usuario._id
+  //TODO: conectar para que cuando se agreguen cotizaciones el admin las vea (socket.io)
     const cotizacionAlmacenada = await cotizacion.save();
+
+    //Agrega el ID de la cotización a la agencia
+    agencia.cotizaciones.push(cotizacionAlmacenada._id)
+    await agencia.save();
 
     //Incluimos el ID de la cotizacion guardada en el usuario que la creó
     usuarioEncontrado.cotizaciones.push(cotizacionAlmacenada._id)

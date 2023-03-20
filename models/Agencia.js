@@ -17,6 +17,13 @@ const agenciaSchema = mongoose.Schema({
       ref: 'Usuario',
       default: []
     }
+  ],
+  cotizaciones: [
+    {
+      type: mongoose.Types.ObjectId,
+      ref: 'Cotizacion',
+      default: []
+    }
   ]
 },{
   timestamps: true

@@ -33,7 +33,8 @@ const obtenerAgenciaById = async (req, res) => {
 
   try {
     const agenciaEncontrada = await Agencia.findById(params.id).select('-createdAt -updatedAt -__v')
-    .populate({path: 'colaboradores', select: 'cotizaciones nombre email rol', populate: { path: 'cotizaciones', select: '-createdAt -updatedAt -__v' }})
+    .populate('colaboradores','cotizaciones nombre email rol')
+    .populate({path: 'cotizaciones', select: '-createdAt -updatedAt -__v', populate: { path: 'creador', select: '_id nombre email identificacion' } })
     res.json(agenciaEncontrada)
   } catch (error) {
     console.log(error)
@@ -149,6 +150,7 @@ const agregarColaborador = async (req, res) => {
 
   try {
     agenciaEncotrada.colaboradores.push(usuarioAgregar._id)
+    agenciaEncotrada.cotizaciones.push(...usuarioAgregar.cotizaciones)
     await agenciaEncotrada.save()
     res.json({msg: 'El colaborador fue agregado exitosamente'})
   } catch (error) {
@@ -158,11 +160,11 @@ const agregarColaborador = async (req, res) => {
 
 const eliminararColaborador = async (req, res) => {
   const params = req.params
-  const { usuario } = req;
-  const { id } = req.body;
+  const { usuario } = req; //Usuario administrador que hace la petición
+  const { id } = req.body; //Usuario que se va a eliminar de la agencia
 
   //Se valida que exista la agencia a la cual se pretende agregar un colaborador
-  const agenciaEncotrada = await Agencia.findById(params.id);
+  const agenciaEncotrada = await Agencia.findById(params.id).populate('cotizaciones', 'creador _id placa');
   if(!agenciaEncotrada){
     const error = new Error('La agencia no existe. Por favor crearla primero.')
     return res.status(404).json({ msg: error.message })
@@ -187,10 +189,15 @@ const eliminararColaborador = async (req, res) => {
     const error = new Error('El usuario no pertenece a la agencia y no se pude eliminar.')
     return res.status(403).json({ msg: error.message })
   }
+  console.log('agencia actual', agenciaEncotrada)
 
   try {
+    const newCotizacionesAgencia = agenciaEncotrada.cotizaciones.filter(coti => coti.creador.toString() !== usuarioEliminar._id.toString());
+    agenciaEncotrada.cotizaciones = newCotizacionesAgencia;
     agenciaEncotrada.colaboradores.pull(usuarioEliminar._id)
     await agenciaEncotrada.save()
+    console.log('agencia modificada', agenciaEncotrada)
+
     res.json({msg: 'El colaborador fue eliminado exitosamente'})
   } catch (error) {
     console.log(error)
